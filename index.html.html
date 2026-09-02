@@ -1,0 +1,710 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RASHI | Photobooth</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffe6f1, #fff6d9, #e9f8e8);
+    color: #704b5c;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 950px;
+    margin: auto;
+    background: rgba(255,255,255,.92);
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: 0 15px 45px rgba(180,100,130,.2);
+}
+
+.logo {
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    letter-spacing: 9px;
+    color: #d86c93;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #987080;
+    margin-bottom: 30px;
+}
+
+.photobooth-wrapper {
+    max-width: 800px;
+    margin: auto;
+}
+
+/* CAMERA */
+
+.camera-section {
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    aspect-ratio: 4 / 3;
+    position: relative;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.camera-status {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #d86c93;
+    font-weight: bold;
+}
+
+/* BUTTONS */
+
+.controls-section,
+.actions-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn {
+    padding: 13px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: #e982a6;
+    color: white;
+}
+
+.btn-secondary {
+    background: #b47a98;
+    color: white;
+}
+
+.btn-danger {
+    background: #e87575;
+    color: white;
+}
+
+.btn-success {
+    background: #91bd85;
+    color: white;
+}
+
+.btn-warning {
+    background: #f4d36b;
+    color: #543f25;
+}
+
+/* PREVIEW */
+
+.preview-section {
+    background: #fff0f5;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px solid #f4c5d5;
+}
+
+.preview-section h3 {
+    color: #d86c93;
+    margin-bottom: 15px;
+}
+
+#preview {
+    max-width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(100,70,80,.15);
+}
+
+/* GALLERY */
+
+.gallery-section {
+    background: #fffdf8;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #f2e3d8;
+}
+
+.gallery-section h3 {
+    text-align: center;
+    color: #d46f92;
+    margin-bottom: 15px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+.gallery-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: #f9e9ee;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+.empty-gallery {
+    text-align: center;
+    color: #aa8997;
+    padding: 20px;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 25px;
+    color: #987080;
+    font-family: Georgia, serif;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 20px 15px;
+        border-radius: 20px;
+    }
+
+    .logo {
+        font-size: 36px;
+        letter-spacing: 6px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+
+    .controls-section,
+    .actions-section {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        RASHI
+    </div>
+
+    <div class="subtitle">
+        ♡ Capture your beautiful memories ♡
+    </div>
+
+    <div class="photobooth-wrapper">
+
+        <div class="camera-status" id="status">
+            Camera is ready to start
+        </div>
+
+        <!-- CAMERA -->
+        <div class="camera-section">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls-section">
+
+            <button
+                id="startBtn"
+                class="btn btn-primary">
+                📷 Start Camera
+            </button>
+
+            <button
+                id="captureBtn"
+                class="btn btn-secondary"
+                disabled>
+                📸 Capture Photo
+            </button>
+
+            <button
+                id="stopBtn"
+                class="btn btn-danger"
+                disabled>
+                ⏹ Stop Camera
+            </button>
+
+        </div>
+
+        <!-- PREVIEW -->
+        <div class="preview-section">
+
+            <h3>
+                ♡ Photo Preview ♡
+            </h3>
+
+            <img
+                id="preview"
+                src=""
+                alt="RASHI Photo Preview"
+                style="display:none;"
+            >
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions-section">
+
+            <button
+                id="downloadBtn"
+                class="btn btn-success"
+                disabled>
+                ۶ৎ Download Photo
+            </button>
+
+            <button
+                id="clearBtn"
+                class="btn btn-warning"
+                disabled>
+                Clear
+            </button>
+
+        </div>
+
+        <!-- GALLERY -->
+        <div class="gallery-section">
+
+            <h3>
+                ⚘ RASHI Photo Gallery ♡
+            </h3>
+
+            <div
+                id="gallery"
+                class="gallery-grid">
+
+                <div
+                    id="emptyGallery"
+                    class="empty-gallery">
+                    Your photos will appear here ♡
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Made with love by RASHI ♡
+    </div>
+
+</div>
+
+
+<script>
+
+let stream = null;
+let capturedPhotos = [];
+
+const video =
+    document.getElementById("video");
+
+const canvas =
+    document.getElementById("canvas");
+
+const preview =
+    document.getElementById("preview");
+
+const startBtn =
+    document.getElementById("startBtn");
+
+const captureBtn =
+    document.getElementById("captureBtn");
+
+const stopBtn =
+    document.getElementById("stopBtn");
+
+const downloadBtn =
+    document.getElementById("downloadBtn");
+
+const clearBtn =
+    document.getElementById("clearBtn");
+
+const gallery =
+    document.getElementById("gallery");
+
+const status =
+    document.getElementById("status");
+
+
+/* =========================
+   START CAMERA
+========================= */
+
+startBtn.addEventListener("click", async () => {
+
+    try {
+
+        if (
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ) {
+
+            alert(
+                "Camera access is not supported by this browser."
+            );
+
+            return;
+        }
+
+        stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: {
+                    facingMode: {
+                        ideal: "user"
+                    },
+
+                    width: {
+                        ideal: 1280
+                    },
+
+                    height: {
+                        ideal: 720
+                    }
+                },
+
+                audio: false
+
+            });
+
+        video.srcObject = stream;
+
+        startBtn.disabled = true;
+        captureBtn.disabled = false;
+        stopBtn.disabled = false;
+
+        status.textContent =
+            "♡ Camera is ready!";
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        if (
+            error.name === "NotAllowedError"
+        ) {
+
+            alert(
+                "Camera permission was denied.\n\n" +
+                "Please press Allow when your browser asks for camera access."
+            );
+
+        } else {
+
+            alert(
+                "Unable to access your camera.\n\n" +
+                "Make sure this website is using HTTPS and that your camera is available."
+            );
+        }
+    }
+
+});
+
+
+/* =========================
+   CAPTURE PHOTO
+========================= */
+
+captureBtn.addEventListener("click", () => {
+
+    if (!stream) return;
+
+    if (!video.videoWidth) {
+
+        alert(
+            "Please wait for the camera to start."
+        );
+
+        return;
+    }
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    /*
+       Mirror the captured photo
+       to match the camera preview.
+    */
+
+    ctx.translate(
+        canvas.width,
+        0
+    );
+
+    ctx.scale(-1, 1);
+
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    const photoData =
+        canvas.toDataURL(
+            "image/png"
+        );
+
+    preview.src = photoData;
+
+    preview.style.display =
+        "block";
+
+    downloadBtn.disabled =
+        false;
+
+    clearBtn.disabled =
+        false;
+
+    capturedPhotos.push(
+        photoData
+    );
+
+    addToGallery(photoData);
+
+    status.textContent =
+        "♡ Photo captured!";
+});
+
+
+/* =========================
+   STOP CAMERA
+========================= */
+
+stopBtn.addEventListener("click", () => {
+
+    stopCamera();
+
+    status.textContent =
+        "Camera stopped ♡";
+
+});
+
+
+function stopCamera() {
+
+    if (stream) {
+
+        stream
+            .getTracks()
+            .forEach(track =>
+                track.stop()
+            );
+
+        stream = null;
+    }
+
+    video.srcObject = null;
+
+    startBtn.disabled = false;
+    captureBtn.disabled = true;
+    stopBtn.disabled = true;
+}
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+downloadBtn.addEventListener(
+    "click",
+    () => {
+
+        if (!preview.src) return;
+
+        const link =
+            document.createElement("a");
+
+        link.href =
+            preview.src;
+
+        link.download =
+            `RASHI-photo-${Date.now()}.png`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+    }
+);
+
+
+/* =========================
+   CLEAR PREVIEW
+========================= */
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        preview.src = "";
+
+        preview.style.display =
+            "none";
+
+        downloadBtn.disabled =
+            true;
+
+        clearBtn.disabled =
+            true;
+
+        status.textContent =
+            "Preview cleared ♡";
+    }
+);
+
+
+/* =========================
+   GALLERY
+========================= */
+
+function addToGallery(photoData) {
+
+    const empty =
+        document.getElementById(
+            "emptyGallery"
+        );
+
+    if (empty) {
+        empty.remove();
+    }
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "gallery-item";
+
+    const img =
+        document.createElement("img");
+
+    img.src =
+        photoData;
+
+    img.alt =
+        "RASHI memory";
+
+    img.addEventListener(
+        "click",
+        () => {
+
+            preview.src =
+                photoData;
+
+            preview.style.display =
+                "block";
+
+            downloadBtn.disabled =
+                false;
+
+            clearBtn.disabled =
+                false;
+        }
+    );
+
+    item.appendChild(img);
+
+    gallery.appendChild(item);
+}
+
+
+/* =========================
+   CLEANUP
+========================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (stream) {
+
+            stream
+                .getTracks()
+                .forEach(track =>
+                    track.stop()
+                );
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>
+```
